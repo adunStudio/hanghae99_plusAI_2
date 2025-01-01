@@ -1,10 +1,20 @@
-# 테스트
-
-- 목차
-
 # Machine Translation with T5 Models
 
-## **Q1) 어떤 task를 선택하셨나요?**
+## 목차
+1. [Q1) 어떤 task를 선택하셨나요?](#q1-어떤-task를-선택하셨나요)  
+2. [Q2) 모델은 어떻게 설계하셨나요?](#q2-모델은-어떻게-설계하셨나요-설계한-모델의-입력과-출력-형태가-어떻게-되나요)  
+3. [Q3) 어떤 pre-trained 모델을 활용하셨나요?](#q3-어떤-pre-trained-모델을-활용하셨나요)  
+4. [기계 번역 평가 지표 (Metrics)](#기계-번역-평가-지표-metrics)  
+5. [Q4)  실제 fine-tuning 했을 때 어떻게 되나요?](#q4-실제로-pre-trained-모델을-fine-tuning했을-때-loss-curve은-어떻게-그려지나요-그리고-pre-train-하지-않은-transformer를-학습했을-때와-어떤-차이가-있나요)  
+   - [1. Only Pre-trained Upstream](#1-only-pre-trained-upstream)  
+   - [2. Non-trained + Full Training](#2-non-trained--full-training)  
+   - [3. Pre-trained + Decoder Fine-tuning](#3-pre-trained--decoder-fine-tuning)  
+   - [4. Pre-trained + Full Fine-tuning](#4-pre-trained--full-fine-tuning) 
+   - [종합 비교](#종합-비교)
+6. [결론](#결론)  
+7. [GitHub Repository](#github-repository)  
+
+## Q1) 어떤 task를 선택하셨나요?
 
 > Machine translation(기계 번역)
 > 
@@ -347,7 +357,7 @@
 > 
 > ---
 > 
-> ### **1. Only Pre-trained Upstream**
+> ### 1. Only Pre-trained Upstream
 > 
 > - **설명:** 사전 학습된 t5-model 모델을 그대로 사용하여 번역을 수행. 추가적인 파인튜닝 없이 평가.
 > - **코드:**
@@ -488,7 +498,7 @@
 > 
 > ---
 > 
-> ### **종합 비교**
+> ### 종합 비교
 > 
 > ![epoch_time_hr_min.png](./images/epoch_time_hr_min.png)
 > 
@@ -552,3 +562,9 @@
 [https://github.com/adunStudio/hanghae99_plusAI_2/blob/main/3주차/[3주차] 심화과제.ipynb](https://github.com/adunStudio/hanghae99_plusAI_2/blob/main/3%EC%A3%BC%EC%B0%A8/%5B3%EC%A3%BC%EC%B0%A8%5D%20%EC%8B%AC%ED%99%94%EA%B3%BC%EC%A0%9C.ipynb)
 
 ---
+
+<div align="right">
+  
+[목차로](#목차)
+
+</div>
