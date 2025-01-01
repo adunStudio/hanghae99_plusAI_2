@@ -166,6 +166,7 @@ cython_debug/
 .idea/
 
 **/data/**
+3주차/3_checkpoint_TextClassifier.pth
 3주차/checkpoint_t5_1.pth
 3주차/checkpoint_t5_2.pth
 3주차/checkpoint_t5_3.pth
