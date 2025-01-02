@@ -16,7 +16,13 @@
 
 ## Q1) 어떤 task를 선택하셨나요?
 
-> Machine translation(기계 번역)
+> > **Machine translation(기계 번역)**
+> 
+> 
+> 기계 번역은 하나의 언어로 쓰여진 문장이 주어졌을 때, 이를 원하는 언어의 문장으로 변환하는 문제입니다. 이는 분류 문제가 아닌 **sequence-to-sequence** 문제로, 2주차에서 배운 **encoder-decoder** 구조를 활용하여 구현해야 합니다.
+> 
+> 이 프로젝트에서는 [**영어-프랑스어 번역 데이터셋**](https://www.kaggle.com/datasets/devicharith/language-translation-englishfrench)을 사용하여 모델을 다양하게 학습시키고, 주어진 문장을 프랑스어로 번역하는 결과를 평가합니다. 기계 번역 모델의 성능은 Loss, Accuracy, Perplexity, 그리고 BLUE Score로 평가할 예정입니다.
+>
 > 
 
 ---
