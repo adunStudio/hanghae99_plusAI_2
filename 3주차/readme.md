@@ -522,7 +522,7 @@
 > - **BLEU Score (번역 품질):**
 >     - 사전 학습 없이 학습한 경우, 번역 품질이 극도로 낮다.
 >     - Decoder Fine-tuning만으로도 BLEU 점수가 크게 상승하지만,
->     - Full Fine-tuning이 가장 좋은 번역 품질을 제공한다.
+>     - Full Fine-tuning이 가장 좋은 번역 품질을 제공한다. (53.88%)
 
 ---
 
