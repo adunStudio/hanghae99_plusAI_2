@@ -1,2 +1,5 @@
 name,score
 basic,94
+emotional,76
+one_shot,85
+zero_shot_cot,91
