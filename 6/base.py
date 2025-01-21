@@ -98,12 +98,12 @@ def main():
         for uploaded_image in uploaded_images:
             chat_service.add_image(uploaded_image)
 
-        image_count = len(uploaded_images)
-        cols = st.columns(image_count)
+        cols = st.columns(len(uploaded_images))
 
         for idx, col in enumerate(cols):
             with col:
                 st.image(uploaded_images[idx], use_container_width=True, caption=uploaded_images[idx].name)
+
 
         with st.chat_message('ai'):
             st.markdown('안녕하세요. 무엇을 도와드릴까요?')
@@ -114,24 +114,24 @@ def main():
             with st.chat_message(role):
                 st.markdown(message.content)
 
+
         selected_prompt = None
         if not chat_service.have_message:
-            left, right = st.columns(2)
-
-            if left.button("주어진 두 사진의 공통점이 뭐야?", use_container_width=True, disabled=chat_service.waiting, on_click=chat_service.set_waiting, args=[True]):
-                selected_prompt = '주어진 두 사진의 공통점이 뭐야?'
-            if right.button("주어진 두 사진의 차이점이 뭐야?", icon=":material/mood:", use_container_width=True, disabled=chat_service.waiting, on_click=chat_service.set_waiting,  args=[True]):
-                selected_prompt = '주어진 두 사진의 차이점이 뭐야?'
+            prepared_prompt = ['주어진 두 사진의 공통점이 뭐야?', '주어진 두 사진의 차이점이 뭐야?']
+            columns = st.columns(len(prepared_prompt))
+            for idx, colum in enumerate(columns):
+                if colum.button(prepared_prompt[idx], use_container_width=True, disabled=chat_service.waiting, on_click=chat_service.set_waiting, args=[True]):
+                    selected_prompt = prepared_prompt[idx]
 
 
         prompt = st.chat_input("메시지를 입력하세요.", disabled=chat_service.waiting, on_submit=chat_service.set_waiting(True))
-
         if selected_prompt or prompt:
             with st.chat_message("user"):
                 st.markdown(selected_prompt or prompt)
 
             with st.chat_message("assistant"):
                 st.write_stream(chat_service.answer_generate_stream(selected_prompt or prompt))
+
                 st.toast('답변 완료!', icon='🎉')
                 time.sleep(1)
 
