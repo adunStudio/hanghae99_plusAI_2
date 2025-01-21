@@ -7,26 +7,30 @@ from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
-from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
-from langchain.chains import ConversationChain
+from langchain.memory import ConversationSummaryBufferMemory
 from langchain.prompts import PromptTemplate
+from langchain_community.callbacks.manager import get_openai_callback
 
 load_dotenv()
 
 class Config:
     OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
-    OPENAI_API_SUMMARY_TOKEN_LIMIT = 3000
+    OPENAI_API_SUMMARY_TOKEN_LIMIT = 5000
 
 
 class ImageChatService:
     def __init__(self, st, api_key, summary_max_token):
         self.st = st
 
+        self._summary_max_token = summary_max_token
+
         self.st.session_state.setdefault("waiting", False)
         self.st.session_state.setdefault("image_messages", [])
         self.st.session_state.setdefault("common_messages", [])
+        self.st.session_state.setdefault("summary_messages", [])
+        self.st.session_state.setdefault("truncated_messages", [])
 
-        # 한글 요약 프롬프트 정의
+        # 한글 요약 프롬프트 정의d
         summary_prompt = PromptTemplate(
             input_variables=["summary", "new_lines"],
             template=(
@@ -38,23 +42,25 @@ class ImageChatService:
             ),
         )
 
-        self.st.session_state.setdefault("common_memory", ConversationSummaryMemory(
-            llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=api_key),
-            max_token_limit=summary_max_token,
-            prompt=summary_prompt,
+        self.st.session_state.setdefault("common_memory", ConversationSummaryBufferMemory(
+            llm=ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=api_key),
+            max_token_limit=self._summary_max_token,
+            #prompt=summary_prompt,
             verbose=False
         ))
 
-        self.st.session_state.setdefault("llm",ChatOpenAI(model="gpt-4o-mini", api_key=api_key))
 
+        self.st.session_state.setdefault("llm", ChatOpenAI(model="gpt-4o-mini", api_key=api_key))
 
-        self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
-        self._image_messages  = self.st.session_state.image_messages
-        self._common_messages = self.st.session_state.common_messages
-        self._common_memory  = self.st.session_state.common_memory
+        self._system_messages    = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
+        self._image_messages     = self.st.session_state.image_messages
+        self._common_messages    = self.st.session_state.common_messages
+        self._common_memory      = self.st.session_state.common_memory
+        self._summary_messages   = self.st.session_state.summary_messages
+        self._truncated_messages = self.st.session_state.truncated_messages
+
 
         self._llm = self.st.session_state.llm
-
 
     @property
     def waiting(self):
@@ -62,6 +68,10 @@ class ImageChatService:
 
     def set_waiting(self, waiting: bool):
         self.st.session_state.waiting = waiting
+
+    @property
+    def _last_token_count(self):
+        return self.st.session_state.last_token_count
 
     @property
     def have_message(self):
@@ -88,10 +98,42 @@ class ImageChatService:
         self._image_messages.append(image_message)
 
     def _add_human_message(self, prompt):
-        self._common_messages.append(HumanMessage(content=prompt))
+        human_message = HumanMessage(content=prompt)
+        self._common_messages.append(human_message)
+        self._truncated_messages.append(human_message)
 
     def _add_ai_message(self, prompt):
-        self._common_messages.append(AIMessage(content=prompt))
+        ai_message = AIMessage(content=prompt)
+        self._common_messages.append(ai_message)
+        self._truncated_messages.append(ai_message)
+
+
+    def _on_tokens_changed(self, tokens):
+        return
+        print(tokens)
+
+        # 토큰 수가 임계값을 넘지 않으면 요약하지 않음
+        if tokens < self._summary_max_token:
+            return
+
+        # _truncated_messages가 비어 있으면 요약하지 않음
+        if len(self._truncated_messages) == 0:
+            return
+
+
+        print('요약 시작')
+        previous_summary = ''
+        if len(self._summary_messages) != 0:
+            print("기존 요약 있다.")
+            previous_summary = self._summary_messages[0].content
+
+        new_summary_message = self._common_memory.predict_new_summary(self._truncated_messages, previous_summary)
+
+        self._truncated_messages.clear()
+
+        self._summary_messages = [AIMessage(content=f'{new_summary_message}')]
+
+        print(f'이전 대화 요약: {new_summary_message}')
 
     @property
     def _last_human_content(self):
@@ -99,32 +141,38 @@ class ImageChatService:
 
     @property
     def _messages(self):
-        return self._system_messages + self._image_messages + self._common_messages
+        return self._system_messages + self._image_messages + self._summary_messages + self._truncated_messages
+
 
     def answer_generate(self, prompt):
-        self._add_human_message(prompt)
+        with get_openai_callback() as callback:
 
-        result = self._llm.invoke(self._messages)
-        print(type(result))
-        print(result)
-        response = result.content
+            self._add_human_message(prompt)
 
-        self._add_ai_message(result)
+            result = self._llm.invoke(self._messages)
+            response = result.content
 
-        #print(self._common_memory.load_memory_variables({})["history"])
-        return response
+            self._add_ai_message(response)
+
+            self._on_tokens_changed(callback.total_tokens)
+
+            return response
 
     def answer_generate_stream(self, prompt):
-        self._add_human_message(prompt)
+        with get_openai_callback() as callback:
 
-        result_stream = self._llm.stream(self._messages)
+            self._add_human_message(prompt)
 
-        response = ""
-        for chunk in result_stream:
-            response += chunk.content
-            yield chunk.content
+            result_stream = self._llm.stream(self._messages)
 
-        self._add_ai_message(response)
+            response = ""
+            for chunk in result_stream:
+                response += chunk.content
+                yield chunk.content
+
+            self._add_ai_message(response)
+
+            self._on_tokens_changed(callback.total_tokens)
 
 
 def main():
@@ -169,8 +217,8 @@ def main():
                 st.markdown(selected_prompt or prompt)
 
             with st.chat_message("assistant"):
-                st.write_stream(chat_service.answer_generate_stream(selected_prompt or prompt))
-                #st.markdown(chat_service.answer_generate(selected_prompt or prompt))
+                #st.write_stream(chat_service.answer_generate_stream(selected_prompt or prompt))
+                st.markdown(chat_service.answer_generate(selected_prompt or prompt))
 
                 st.toast('답변 완료!', icon='🎉')
                 time.sleep(1)
