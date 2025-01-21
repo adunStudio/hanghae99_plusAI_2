@@ -7,26 +7,54 @@ from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
+from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
+from langchain.chains import ConversationChain
+from langchain.prompts import PromptTemplate
 
 load_dotenv()
 
 class Config:
     OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
+    OPENAI_API_SUMMARY_TOKEN_LIMIT = 3000
+
 
 class ImageChatService:
-    def __init__(self, st, api_key):
+    def __init__(self, st, api_key, summary_max_token):
         self.st = st
 
         self.st.session_state.setdefault("waiting", False)
         self.st.session_state.setdefault("image_messages", [])
         self.st.session_state.setdefault("common_messages", [])
 
-        self.system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
-        self.image_messages  = self.st.session_state.image_messages
-        self.common_messages = self.st.session_state.common_messages
+        # 한글 요약 프롬프트 정의
+        summary_prompt = PromptTemplate(
+            input_variables=["summary", "new_lines"],
+            template=(
+                "다음은 지금까지의 대화 요약입니다:\n"
+                "{summary}\n\n"
+                "다음은 새로 추가된 대화입니다:\n"
+                "{new_lines}\n\n"
+                "이 대화를 기반으로 대화 요약을 한글로 업데이트하세요:"
+            ),
+        )
+
+        self.st.session_state.setdefault("common_memory", ConversationSummaryMemory(
+            llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=api_key),
+            max_token_limit=summary_max_token,
+            prompt=summary_prompt,
+            verbose=False
+        ))
+
+        self.st.session_state.setdefault("llm",ChatOpenAI(model="gpt-4o-mini", api_key=api_key))
 
 
-        self.llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
+        self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
+        self._image_messages  = self.st.session_state.image_messages
+        self._common_messages = self.st.session_state.common_messages
+        self._common_memory  = self.st.session_state.common_memory
+
+        self._llm = self.st.session_state.llm
+
 
     @property
     def waiting(self):
@@ -37,7 +65,11 @@ class ImageChatService:
 
     @property
     def have_message(self):
-        return len(self.common_messages) > 0
+        return len(self._common_messages) > 0
+
+    @property
+    def chat_histories(self):
+        return self._common_messages
 
     def add_image(self, image):
         base64_image = base64.b64encode(image.read()).decode("utf-8")
@@ -53,32 +85,39 @@ class ImageChatService:
                 },
             ],
         )
-        self.image_messages.append(image_message)
+        self._image_messages.append(image_message)
 
     def _add_human_message(self, prompt):
-        self.common_messages.append(HumanMessage(content=prompt))
+        self._common_messages.append(HumanMessage(content=prompt))
 
     def _add_ai_message(self, prompt):
-        self.common_messages.append(AIMessage(content=prompt))
+        self._common_messages.append(AIMessage(content=prompt))
+
+    @property
+    def _last_human_content(self):
+        return self._common_messages[-1].content
 
     @property
     def _messages(self):
-        return self.system_messages + self.image_messages + self.common_messages
+        return self._system_messages + self._image_messages + self._common_messages
 
     def answer_generate(self, prompt):
         self._add_human_message(prompt)
 
-        result = self.llm.invoke(self._messages)
+        result = self._llm.invoke(self._messages)
+        print(type(result))
+        print(result)
         response = result.content
 
         self._add_ai_message(result)
 
+        #print(self._common_memory.load_memory_variables({})["history"])
         return response
 
     def answer_generate_stream(self, prompt):
         self._add_human_message(prompt)
 
-        result_stream = self.llm.stream(self._messages)
+        result_stream = self._llm.stream(self._messages)
 
         response = ""
         for chunk in result_stream:
@@ -89,7 +128,7 @@ class ImageChatService:
 
 
 def main():
-    chat_service = ImageChatService(st, Config.OPENAI_API_KEY)
+    chat_service = ImageChatService(st, Config.OPENAI_API_KEY, Config.OPENAI_API_SUMMARY_TOKEN_LIMIT)
 
     st.title("Image Chat Bot")
 
@@ -108,7 +147,7 @@ def main():
         with st.chat_message('ai'):
             st.markdown('안녕하세요. 무엇을 도와드릴까요?')
 
-        for message in chat_service.common_messages:
+        for message in chat_service.chat_histories:
             role = 'ai' if isinstance(message, AIMessage) else 'human'
 
             with st.chat_message(role):
@@ -131,6 +170,7 @@ def main():
 
             with st.chat_message("assistant"):
                 st.write_stream(chat_service.answer_generate_stream(selected_prompt or prompt))
+                #st.markdown(chat_service.answer_generate(selected_prompt or prompt))
 
                 st.toast('답변 완료!', icon='🎉')
                 time.sleep(1)
