@@ -27,6 +27,15 @@ class ImageChatService:
     ####################################################################################################################
     # Public Method
     ####################################################################################################################
+    def set_images(self, images):
+        self._image_hashes = []
+        self._image_messages = []
+
+        for image in images:
+            self.add_image(image)
+
+        print('이미지 갱신')
+
     def add_image(self, image):
         image_data = image.read()
         image_hash = hashlib.md5(image_data).hexdigest()  # 해시값 계산

@@ -27,21 +27,22 @@ def main():
 
     if uploaded_images := st.file_uploader("✨ 함께할 이미지를 올려볼까요? 🌈", type=['png', 'jpg', 'jpeg'], accept_multiple_files=True):
 
-        # 🔹 1. 이미지 업로드
-        for uploaded_image in uploaded_images:
-            chat_service.add_image(uploaded_image)
-
+        # 🔹 1. 이미지 갱신
         image_count = len(uploaded_images)
         if st.session_state.image_count != image_count:
             st.session_state.image_count = image_count
+            chat_service.set_images(uploaded_images)
             chat_service.set_waiting(False)
 
         # 🔹 2. 이미지 노출
         cols = st.columns(image_count)
-
         for idx, col in enumerate(cols):
             with col:
                 st.image(uploaded_images[idx], use_container_width=True, caption=uploaded_images[idx].name)
+
+        if image_count < 2:
+            st.warning('이미지를 두 장 올려주시면 대화를 시작할 수 있어요 😊')
+            return
 
         # 🔹 3. 시작 메시지
         with st.chat_message('ai'):
