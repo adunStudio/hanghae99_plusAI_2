@@ -17,7 +17,7 @@ class ImageChatService:
 
         self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
         self._image_messages  = []
-        self._common_messages = []
+        self._chat_messages   = [] # 전체 대화 기록
         self._summary_messages = SummaryBufferConversation(api_key, max_token, buffer_count) # 자동 요약
 
         self._waiting = False
@@ -63,11 +63,11 @@ class ImageChatService:
 
     @property
     def have_message(self):
-        return len(self._common_messages) > 0
+        return len(self._chat_messages) > 0
 
     @property
     def chat_histories(self):
-        return self._common_messages
+        return self._chat_messages
 
     @property
     def _all_messages(self):
@@ -90,10 +90,10 @@ class ImageChatService:
 
     def _add_human_message(self, prompt):
         human_message = AdvancedHumanMessage(content=prompt)
-        self._common_messages.append(human_message)
+        self._chat_messages.append(human_message)
         self._summary_messages.append(human_message)
 
     def _add_ai_message(self, prompt):
         ai_message = AdvancedAIMessage(content=prompt)
-        self._common_messages.append(ai_message)
+        self._chat_messages.append(ai_message)
         self._summary_messages.append(ai_message)
