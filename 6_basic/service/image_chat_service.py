@@ -1,4 +1,5 @@
 import base64
+import hashlib
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
@@ -7,13 +8,14 @@ from message import AdvancedAIMessage, AdvancedHumanMessage
 from conversation import SummaryBufferConversation
 
 
-
 class ImageChatService:
     def __init__(self, api_key, max_token, buffer_count):
 
         self._api_key = api_key
 
         self._llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
+
+        self._image_hashes = []
 
         self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
         self._image_messages  = []
@@ -26,7 +28,13 @@ class ImageChatService:
     # Public Method
     ####################################################################################################################
     def add_image(self, image):
-        base64_image = base64.b64encode(image.read()).decode("utf-8")
+        image_data = image.read()
+        image_hash = hashlib.md5(image_data).hexdigest()  # 해시값 계산
+        if image_hash in self._image_hashes:
+            return
+
+        self._image_hashes.append(image_hash)
+        base64_image = base64.b64encode(image_data).decode("utf-8")
         self._add_image_message(base64_image)
 
     def answer_generate(self, prompt):
