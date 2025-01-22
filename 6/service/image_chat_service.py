@@ -7,10 +7,9 @@ from messages import AdvancedAIMessage, AdvancedHumanMessage
 
 
 class ImageChatService:
-    def __init__(self, api_key, summary_max_token):
+    def __init__(self, api_key, max_token, buffer_count):
 
         self._api_key = api_key
-        self._summary_max_token = summary_max_token
 
         self._llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
 

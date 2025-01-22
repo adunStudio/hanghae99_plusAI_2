@@ -12,12 +12,13 @@ load_dotenv()
 
 class Config:
     OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
-    OPENAI_API_SUMMARY_TOKEN_LIMIT = 5000
+    SUMMARY_TOKEN_LIMIT = 10000
+    CHAT_BUFFER_COUNT = 10
 
 
 def main():
     # 🔹 이미지 채팅 서비스 객체 세션
-    st.session_state.setdefault("chat_service", ImageChatService(Config.OPENAI_API_KEY, Config.OPENAI_API_SUMMARY_TOKEN_LIMIT))
+    st.session_state.setdefault("chat_service", ImageChatService(Config.OPENAI_API_KEY, Config.SUMMARY_TOKEN_LIMIT, Config.CHAT_BUFFER_COUNT))
     chat_service = st.session_state.chat_service
 
     # 🔹 서비스 타이틀
