@@ -59,6 +59,7 @@ def main():
         # 🔹 6. 메시지 직접 입력
         prompt = st.chat_input("📝 메시지를 입력해보세요! 😊", disabled=chat_service.waiting, on_submit=chat_service.set_waiting(True))
         if selected_prompt or prompt:
+
             with st.chat_message("user"):
                 st.markdown(selected_prompt or prompt)
 

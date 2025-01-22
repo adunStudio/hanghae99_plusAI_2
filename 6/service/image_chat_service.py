@@ -82,6 +82,7 @@ class ImageChatService:
                     "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
                 },
             ],
+            check_tokens=False
         )
         self._image_messages.append(image_message)
 
