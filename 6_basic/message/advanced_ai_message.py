@@ -17,6 +17,10 @@ class AdvancedAIMessage(AIMessage):
             content = self.content if isinstance(self.content, str) else f'{content}'
             self._tokens = len(AdvancedAIMessage._enc.encode(content))
 
+    ####################################################################################################################
+    # Property
+    ####################################################################################################################
+
     @property
     def role(self) -> str:
         return 'ai'

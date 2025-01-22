@@ -32,6 +32,10 @@ class SummaryBufferConversation:
 
         self._chain = summary_prompt | summary_llm
 
+    ####################################################################################################################
+    # Public Method
+    ####################################################################################################################
+
     def append(self, message):
         self._messages.append(message)
 
@@ -42,14 +46,19 @@ class SummaryBufferConversation:
 
         return self._summary + self._messages
 
+    ####################################################################################################################
+    # Private Method
+    ####################################################################################################################
+
     def _call_summary(self):
         if len(self._messages) <= self._buffer_count:
             return
 
-        if self._total_tokens <= self._max_token:
+        total_token = self._get_total_token()
+        if total_token <= self._max_token:
             return
 
-        print(f'요약 시작({self._total_tokens})')
+        print(f'요약 시작({total_token})')
 
         messages = self._messages[:-self._buffer_count]
         self._messages = self._messages[-self._buffer_count:]
@@ -63,8 +72,7 @@ class SummaryBufferConversation:
         print(f'요약 완료({self._summary[0].tokens})')
         print(self._summary[0].content)
 
-    @property
-    def _total_tokens(self):
+    def _get_total_token(self):
         if len(self._messages) <= self._buffer_count:
             return 0
 

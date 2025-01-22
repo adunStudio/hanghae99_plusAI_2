@@ -17,6 +17,10 @@ class AdvancedHumanMessage(HumanMessage):
             content = self.content if isinstance(self.content, str) else f'{content}'
             self._tokens = len(AdvancedHumanMessage._enc.encode(content))
 
+    ####################################################################################################################
+    # Property
+    ####################################################################################################################
+
     @property
     def role(self) -> str:
         return 'human'
