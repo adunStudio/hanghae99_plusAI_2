@@ -1,7 +1,9 @@
 # [6주차] 기본과제: 이미지를 가지고 질의응답을 진행할 수 있는 챗봇 구현
 
 ### 시연 영상
-
+<p align="center">
+  <video src="./image/basic_demo_video.mp4"></video>
+</p>
 
 ### 프로젝트 구조
 ```
