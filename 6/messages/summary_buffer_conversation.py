@@ -16,7 +16,7 @@ class SummaryBufferConversation:
 
     def __init_chain(self):
         summary_prompt = PromptTemplate(
-            input_variables=["previous_summary", "messages", "max_token"],
+            input_variables=["previous_summary", "messages"],
             template=(
                 "다음은 지금까지의 대화 요약입니다:\n"
                 "{previous_summary}\n\n"
@@ -54,7 +54,7 @@ class SummaryBufferConversation:
 
         previous_summary = '' if len(self._summary) == 0 else self._summary[0].content
 
-        result = self._chain.invoke({'previous_summary': previous_summary, 'messages': messages, 'max_token': self._max_token})
+        result = self._chain.invoke({'previous_summary': previous_summary, 'messages': messages})
 
         self._summary = [AdvancedAIMessage(content=result.content)]
 
