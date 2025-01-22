@@ -2,8 +2,9 @@ import base64
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
-from messages import AdvancedAIMessage, AdvancedHumanMessage
-from messages import SummaryBufferConversation
+
+from message import AdvancedAIMessage, AdvancedHumanMessage
+from conversation import SummaryBufferConversation
 
 
 
@@ -17,7 +18,7 @@ class ImageChatService:
         self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
         self._image_messages  = []
         self._common_messages = []
-        self._summary_messages = SummaryBufferConversation(api_key, max_token, buffer_count)
+        self._summary_messages = SummaryBufferConversation(api_key, max_token, buffer_count) # 자동 요약
 
         self._waiting = False
 

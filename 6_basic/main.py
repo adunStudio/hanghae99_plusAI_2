@@ -52,8 +52,7 @@ def main():
             prepared_prompt = ['두 사진의 공통점은?', '두 사진의 차이점은?']
             columns = st.columns(len(prepared_title))
             for idx, colum in enumerate(columns):
-                if colum.button(prepared_title[idx], use_container_width=True, disabled=chat_service.waiting,
-                                on_click=chat_service.set_waiting, args=[True]):
+                if colum.button(prepared_title[idx], use_container_width=True, disabled=chat_service.waiting, on_click=chat_service.set_waiting, args=[True]):
                     selected_prompt = prepared_prompt[idx]
 
         # 🔹 6. 메시지 직접 입력
