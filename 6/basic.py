@@ -17,8 +17,7 @@ class Config:
 
 def main():
     # 🔹 이미지 채팅 서비스 객체 세션
-    st.session_state.setdefault("chat_service",
-                                ImageChatService(Config.OPENAI_API_KEY, Config.OPENAI_API_SUMMARY_TOKEN_LIMIT))
+    st.session_state.setdefault("chat_service", ImageChatService(Config.OPENAI_API_KEY, Config.OPENAI_API_SUMMARY_TOKEN_LIMIT))
     chat_service = st.session_state.chat_service
 
     # 🔹 서비스 타이틀
