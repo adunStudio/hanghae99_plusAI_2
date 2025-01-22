@@ -16,6 +16,8 @@ class Config:
 
 
 def main():
+    st.session_state.setdefault("image_count", 0)
+
     # 🔹 이미지 채팅 서비스 객체 세션
     st.session_state.setdefault("chat_service", ImageChatService(Config.OPENAI_API_KEY, Config.SUMMARY_TOKEN_LIMIT, Config.CHAT_BUFFER_COUNT))
     chat_service = st.session_state.chat_service
@@ -29,9 +31,14 @@ def main():
         for uploaded_image in uploaded_images:
             chat_service.add_image(uploaded_image)
 
-        cols = st.columns(len(uploaded_images))
+        image_count = len(uploaded_images)
+        if st.session_state.image_count != image_count:
+            st.session_state.image_count = image_count
+            chat_service.set_waiting(False)
 
         # 🔹 2. 이미지 노출
+        cols = st.columns(image_count)
+
         for idx, col in enumerate(cols):
             with col:
                 st.image(uploaded_images[idx], use_container_width=True, caption=uploaded_images[idx].name)
