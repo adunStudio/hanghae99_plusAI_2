@@ -42,9 +42,7 @@ def main():
 
         # 🔹 4. 채팅 메시지 히스토리
         for message in chat_service.chat_histories:
-            role = 'ai' if isinstance(message, AIMessage) else 'human'
-
-            with st.chat_message(role):
+            with st.chat_message(message.role):
                 st.markdown(message.content)
 
         # 🔹5. 기존에 메시지 없다면 -> 준비된 목록 선택 가능

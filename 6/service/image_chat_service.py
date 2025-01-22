@@ -1,9 +1,10 @@
 import base64
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
-from langchain.memory import ConversationSummaryBufferMemory
-from langchain.prompts import PromptTemplate
+from langchain_core.messages import SystemMessage
+from messages import AdvancedAIMessage, AdvancedHumanMessage
+
+
 
 class ImageChatService:
     def __init__(self, api_key, summary_max_token):
@@ -74,7 +75,7 @@ class ImageChatService:
     # Private Method
     ####################################################################################################################
     def _add_image_message(self, base64_image):
-        image_message = HumanMessage(
+        image_message = AdvancedHumanMessage(
             content=[
                 {
                     "type": "image_url",
@@ -85,9 +86,9 @@ class ImageChatService:
         self._image_messages.append(image_message)
 
     def _add_human_message(self, prompt):
-        human_message = HumanMessage(content=prompt)
+        human_message = AdvancedHumanMessage(content=prompt)
         self._common_messages.append(human_message)
 
     def _add_ai_message(self, prompt):
-        ai_message = AIMessage(content=prompt)
+        ai_message = AdvancedAIMessage(content=prompt)
         self._common_messages.append(ai_message)
