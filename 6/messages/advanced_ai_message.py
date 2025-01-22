@@ -8,7 +8,6 @@ class AdvancedAIMessage(AIMessage):
     def __init__(self, content: str, check_tokens: bool = True):
         super().__init__(content=content)
 
-        self._role = 'ai'
         self._tokens = 0
 
         if not isinstance(AdvancedAIMessage._enc, tiktoken.Encoding):
@@ -20,7 +19,7 @@ class AdvancedAIMessage(AIMessage):
 
     @property
     def role(self) -> str:
-        return self._role
+        return 'ai'
 
     @property
     def tokens(self) -> int:

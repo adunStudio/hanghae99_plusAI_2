@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 
-from langchain_core.messages import AIMessage
 from service import ImageChatService
 
 import os

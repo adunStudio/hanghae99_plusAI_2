@@ -3,7 +3,7 @@ from langchain import PromptTemplate
 from messages import AdvancedAIMessage, AdvancedHumanMessage
 
 
-class SummaryMessages:
+class SummaryBufferConversation:
     def __init__(self, api_key, max_token, buffer_count=5):
         self._api_key = api_key
         self._max_token = max_token        # 맥스 토큰
@@ -23,21 +23,18 @@ class SummaryMessages:
                 "다음은 새로 추가된 대화들입니다:\n"
                 "{messages}\n\n"
                 "이전 대화와 추가된 대화를 요약해 한글로 업데이트하세요:"
-                "요약 결과는 최대 {max_token}이하이어야 합니다."
             ),
         )
 
-        self._llm = ChatOpenAI(model="gpt-4o-mini", api_key=self._api_key)
+        summary_llm = ChatOpenAI(model="gpt-4o-mini", api_key=self._api_key, max_tokens=self._max_token)
 
-        self._chain = summary_prompt | self._llm
+        self._chain = summary_prompt | summary_llm
 
     def append(self, message):
         self._messages.append(message)
 
     def get(self):
         print(f'현재 토큰: {self._total_tokens }')
-        if self._total_tokens <= self._max_token:
-            return self._summary + self._messages
 
         self._call_summary()
 
@@ -45,6 +42,9 @@ class SummaryMessages:
 
     def _call_summary(self):
         if len(self._messages) <= self._buffer_count:
+            return
+
+        if self._total_tokens <= self._max_token:
             return
 
         print(f'요약 시작({self._total_tokens})')
@@ -59,6 +59,7 @@ class SummaryMessages:
         self._summary = [AdvancedAIMessage(content=result.content)]
 
         print(f'요약 완료({self._summary[0].tokens})')
+        print(self._summary[0].content)
 
     @property
     def _total_tokens(self):

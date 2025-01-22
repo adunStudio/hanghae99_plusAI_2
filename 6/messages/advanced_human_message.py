@@ -8,7 +8,6 @@ class AdvancedHumanMessage(HumanMessage):
     def __init__(self, content: str, check_tokens: bool = True):
         super().__init__(content=content)
 
-        self._role = 'human'
         self._tokens = 0
 
         if not isinstance(AdvancedHumanMessage._enc, tiktoken.Encoding):
@@ -20,7 +19,7 @@ class AdvancedHumanMessage(HumanMessage):
 
     @property
     def role(self) -> str:
-        return self._role
+        return 'human'
 
     @property
     def tokens(self) -> int:

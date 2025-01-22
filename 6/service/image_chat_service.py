@@ -3,6 +3,7 @@ import base64
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from messages import AdvancedAIMessage, AdvancedHumanMessage
+from messages import SummaryBufferConversation
 
 
 
@@ -16,6 +17,7 @@ class ImageChatService:
         self._system_messages = [SystemMessage(content='당신은 주어지는 이미지를 참고해서 응답하는 챗봇입니다.')]
         self._image_messages  = []
         self._common_messages = []
+        self._summary_messages = SummaryBufferConversation(api_key, max_token, buffer_count)
 
         self._waiting = False
 
@@ -68,7 +70,7 @@ class ImageChatService:
 
     @property
     def _all_messages(self):
-        return self._system_messages + self._image_messages + self._common_messages
+        return self._system_messages + self._image_messages + self._summary_messages.get()
 
     ####################################################################################################################
     # Private Method
@@ -88,7 +90,9 @@ class ImageChatService:
     def _add_human_message(self, prompt):
         human_message = AdvancedHumanMessage(content=prompt)
         self._common_messages.append(human_message)
+        self._summary_messages.append(human_message)
 
     def _add_ai_message(self, prompt):
         ai_message = AdvancedAIMessage(content=prompt)
         self._common_messages.append(ai_message)
+        self._summary_messages.append(ai_message)
