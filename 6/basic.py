@@ -45,7 +45,7 @@ def main():
             with st.chat_message(message.role):
                 st.markdown(message.content)
 
-        # 🔹5. 기존에 메시지 없다면 -> 준비된 목록 선택 가능
+        # 🔹 5. 기존에 메시지 없다면 -> 준비된 목록 선택 가능
         selected_prompt = None
         if not chat_service.have_message:
             prepared_title = ['🤔 **두 사진의 공통점은?**', '🔍 **두 사진의 차이점은?**']
