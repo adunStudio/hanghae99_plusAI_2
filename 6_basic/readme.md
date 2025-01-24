@@ -5,7 +5,7 @@
 
 ### 프로젝트 구조
 ```
-─── main.py (streamlit)
+─── main.py (Streamlit 앱의 진입점)
 
 └── service
     └── ImageChatService.py (LLM 채팅 서비스)
