@@ -171,3 +171,7 @@ cython_debug/
 3주차/checkpoint_t5_2.pth
 3주차/checkpoint_t5_3.pth
 3주차/checkpoint_t5_4.pth
+
+
+Wandb/
+
