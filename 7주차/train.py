@@ -187,6 +187,22 @@ with training_args.main_process_first(desc="grouping texts together"):
     )
 
 
+from transformers import TrainerCallback, TrainerState, TrainerControl
+
+# 콜백 클래스 정의
+class WandbLoggingCallback(TrainerCallback):
+    def on_log(self, args, state: TrainerState, control: TrainerControl, logs=None, **kwargs):
+        """훈련 중 매 로그 이벤트 발생 시 호출됩니다."""
+        if logs is not None:
+            # train loss 기록
+            if "loss" in logs:
+                wandb.log({"train/loss": logs["loss"], "step": state.global_step})
+
+            # validation 평가 및 loss 기록 (평가 주기에 따라 실행됨)
+            if "eval_loss" in logs:
+                wandb.log({"eval/loss": logs["eval_loss"], "step": state.global_step})
+
+
 # 학습 및 Validation 데이터셋 준비
 train_dataset      = lm_datasets["train"]
 validation_dataset = lm_datasets["validation"]
@@ -199,7 +215,8 @@ trainer = Trainer(
     train_dataset=train_dataset,
     eval_dataset=validation_dataset,  # validation 데이터셋 추가
     tokenizer=tokenizer,
-    data_collator=default_data_collator  # 기본 데이터 collator 사용
+    data_collator=default_data_collator,  # 기본 데이터 collator 사용
+    callbacks = [WandbLoggingCallback()]  # 콜백 추가
 )
 
 # 체크포인트 설정
@@ -224,7 +241,3 @@ trainer.save_state()
 
 # Validation 평가 수행
 eval_metrics = trainer.evaluate()  # validation 데이터셋을 사용하여 평가 수행
-
-# Wandb에 평가 메트릭 기록
-trainer.log_metrics("eval", eval_metrics)
-wandb.log({"train/loss": metrics["loss"], "eval/loss": eval_metrics["eval_loss"]})
