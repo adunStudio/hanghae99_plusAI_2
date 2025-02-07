@@ -37,7 +37,7 @@ response_template = "### Response:"
 collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenizer)
 
 # 🔹 7. W&B 설정
-wandb.init(project="llama-instruction-tuning", name="llama-3b-instruct")
+wandb.init(project="gemma-instruction-tuning", name="google/gemma-2-2b-it")
 
 # 🔹 8. ROUGE 및 BLEU 메트릭 로드
 rouge_metric = evaluate.load("rouge")
@@ -90,7 +90,7 @@ trainer = SFTTrainer(
         per_device_eval_batch_size=4,
         num_train_epochs=10,
         logging_dir="./logs",
-        logging_steps=50,
+        logging_steps=100,
         save_steps=100,
         report_to=["wandb"]  # W&B에 로그 전송
     ),
