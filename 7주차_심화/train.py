@@ -23,7 +23,8 @@ dataset = DatasetDict({
 })
 
 # 🔹 4. 모델 및 토크나이저 설정
-model_name = "meta-llama/Llama-3.2-3B-Instruct"
+#model_name = "meta-llama/Llama-3.2-3B-Instruct"
+model_name = "google/gemma-2-2b-it"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 
@@ -75,7 +76,8 @@ def compute_metrics(eval_preds):
         "rougeL": rouge["rougeL"].mid.fmeasure,
     }
 
-output_dir = "./finetuned_llama"
+#output_dir = "./finetuned_llama"
+output_dir = "./finetuned_gemma"
 
 # 🔹 10. SFT Trainer 설정
 trainer = SFTTrainer(
