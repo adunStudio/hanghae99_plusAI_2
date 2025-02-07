@@ -1,4 +1,4 @@
-# 7주차 기본과제
+# 7주차 심화과제
 
 ![train/loss eval/loss](./result.png)
 - [train/loss vs eval/loss](https://api.wandb.ai/links/iamkimhongil92-lumenasoft/aydswi0g)
