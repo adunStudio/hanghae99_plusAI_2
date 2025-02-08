@@ -19,8 +19,8 @@ Instruction-tuning이 여러 LoRA 설정에 비해 성능이 더 좋아 보입�
 - Rank 256은 가장 긴 훈련 시간을 소요했습니다.
 
 ## 3. max_memory_allocated_gb 그래프
-- Instruction-tuning은 메모리 사용량이 LoRA Rank 256과 비슷하거나 약간 적은 수준입니다.
-- Rank 8에서는 메모리 사용량이 현저히 낮습니다.
+- Instruction-tuning은 메모리 사용량이 가장 낮습니다.
+- Rank 8에서는 Rank 128, 256에 비해 메모리 사용량이 낮습니다.
 
 ## 4. 전반적인 성능 비교
 - Instruction-tuning은 빠른 손실 감소와 우수한 최종 성능을 보여주며, 훈련 시간도 비교적 짧습니다.
