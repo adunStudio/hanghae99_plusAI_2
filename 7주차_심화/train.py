@@ -56,6 +56,36 @@ class WandbLoggingCallback(TrainerCallback):
 
 output_dir = "./instruction_facebook"
 
+
+
+from transformers import Trainer
+import evaluate
+import numpy as np
+
+# ROUGE, BLEU 메트릭 로드
+rouge_metric = evaluate.load("rouge")
+bleu_metric = evaluate.load("bleu")
+
+
+def compute_metrics(eval_preds):
+    predictions, labels = eval_preds
+    decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
+    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    # BLEU 점수 계산
+    bleu = bleu_metric.compute(predictions=decoded_preds, references=decoded_labels)
+
+    # ROUGE 점수 계산
+    rouge = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
+
+    return {
+        "bleu_score": bleu["bleu"],
+        "rouge1": rouge["rouge1"].mid.fmeasure,
+        "rouge2": rouge["rouge2"].mid.fmeasure,
+        "rougeL": rouge["rougeL"].mid.fmeasure,
+    }
+
+
 # 🔹 9. SFT Trainer 설정
 trainer = SFTTrainer(
     model=model,
@@ -75,6 +105,9 @@ trainer = SFTTrainer(
         load_best_model_at_end=True,  # 가장 낮은 평가 손실을 갖는 모델을 저장
         metric_for_best_model="eval_loss",  # 가장 낮은 eval_loss를 기준으로 모델 선택
     ),
+
+    #compute_metrics=compute_metrics,
+
     formatting_func=formatting_prompts_func,
     data_collator=collator,
     callbacks=[WandbLoggingCallback()]  # 콜백 추가
@@ -83,5 +116,4 @@ trainer = SFTTrainer(
 
 # 🔹 10. 학습 시작
 trainer.train()
-
 wandb.finish()
