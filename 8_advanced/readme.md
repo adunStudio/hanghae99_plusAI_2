@@ -22,3 +22,9 @@
 ✅ **4비트 양자화(NF4)에서는 속도 저하가 더 심할 수 있음**  
 
 이론과 실제는 같다...
+
+## 챗봇(4o-mini vs 5B 16bit 양자화)
+![result1](./img/result1.png)
+![result2](./img/result2.png)
+- 각 첫 번째 질문: ChatGPT-40-mini 사용
+- 각 두 번째 질문: 5B 16bit 양자화 모델 사용 (채팅 입력 왼쪽 8B는 잘못 표기)
